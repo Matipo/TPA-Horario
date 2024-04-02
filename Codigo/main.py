@@ -47,21 +47,21 @@ def main(page: ft.Page):
     
     
     #Crear item
-    def ite(ite):
-        ite = []
-        ite.append(
+    def semanainfo(semanainfo):
+        semanainfo = []
+        semanainfo.append(
             ft.Container(
-                        content=ft.Text(value=str(f"Semana {dia1} - {dia2} {mes} {year}")),
+                        content=ft.Text(f"Semana {dia1} - {dia2} {mes} {year}",color=ft.colors.WHITE),
                         alignment=ft.alignment.center,
                         width=300,
                         height=30,
-                        bgcolor=ft.colors.ORANGE_800,
+                        bgcolor=ft.colors.DEEP_ORANGE_300,
                         border_radius=ft.border_radius.all(5),
             )  
         )
-        return ite
+        return semanainfo
     #Para mostrar la fila
-    row1 = ft.Row(controls=ite(0), alignment=ft.MainAxisAlignment.CENTER)
+    row1 = ft.Row(controls=semanainfo(0), alignment=ft.MainAxisAlignment.CENTER)
     page.add(row1)
     #Crea los cuadros para los dias de la semana
     def items(i):
@@ -71,35 +71,39 @@ def main(page: ft.Page):
             
             if i=="":
                 items.append(
+                    #Crea el boton de Create event
                     ft.Container(
-                        content=ft.Text(value=str(i)),
+                        content=ft.Text("Add element",color=ft.colors.WHITE),
                         alignment=ft.alignment.center,
                         width=100,
                         height=50,
-                        
-                        border_radius=ft.border_radius.all(5),
+                        bgcolor=ft.colors.DEEP_ORANGE_300,
+                        border_radius=ft.border_radius.all(20),
+                        ink=True,
+                        on_click=lambda e: print("Boton clickeado"),
                     )    )
             else:
                 if i == dia:
+                    #CREA UN CUADRADO DE DISTINTO COLOR SI ES EL DIA EN EL QUE TE ENCUENTRAS
                     items.append(
                     ft.Container(
                     
-                        content=ft.Text(value=str(i)),
+                        content=ft.Text(i,color=ft.colors.WHITE),
                         alignment=ft.alignment.center,
                         width=100,
                         height=50,
-                        bgcolor=ft.colors.TEAL,
+                        bgcolor=ft.colors.DEEP_ORANGE_300,
                         border_radius=ft.border_radius.all(5),
                     ))
                 else:
                     items.append(
                     ft.Container(
                     
-                        content=ft.Text(value=str(i)),
+                        content=ft.Text(i,color=ft.colors.WHITE),
                         alignment=ft.alignment.center,
                         width=100,
                         height=50,
-                        bgcolor=ft.colors.GREEN_700,
+                        bgcolor=ft.colors.BLUE_900,
                         border_radius=ft.border_radius.all(5),
                     ))
                 
