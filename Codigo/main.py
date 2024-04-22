@@ -8,11 +8,21 @@ async def main(page:ft.Page):
     page.padding = 0
     page.window_width = 1200
     page.window_height = 1000
-    page.window_resizable = False
-    page.window_maximized = True
+    page.window_resizable = True
+    page.window_maximized = False
+    page.window_maximizable = False
 
     user_input = ft.TextField(label="Ingresa nombre de evento", autofocus=True)
-
+    
+    semanainfo = ft.Container(width=500,height=40,
+                     content=ft.Text("Semana",color=ft.colors.TEAL_ACCENT_400,weight=ft.FontWeight.W_500),
+                     border_radius=10,
+                     bgcolor=ft.colors.TEAL_900,
+                     alignment=ft.alignment.center,
+                )
+    
+    superior = ft.Container(content=semanainfo,alignment=ft.alignment.center,margin=ft.margin.only(top=10))
+    page.add(superior)
     # Estructura para almacenar los eventos
     eventos_semana = {dia: [] for dia in dias}
     
@@ -39,13 +49,40 @@ async def main(page:ft.Page):
     # Función que se llama cuando se guarda un evento
     def closesave_dlg(e):
         evento = user_input.value
-        if c1.value:
-            eventos_semana["Lunes"].append(evento)
-            actualizar_eventos()
+        if evento != "":
+            if c1.value:
+                eventos_semana["Lunes"].append(evento)
+                actualizar_eventos()
+            if c2.value:
+                eventos_semana["Martes"].append(evento)
+                actualizar_eventos()
+            if c3.value:
+                eventos_semana["Miércoles"].append(evento)
+                actualizar_eventos()
+            if c4.value:
+                eventos_semana["Jueves"].append(evento)
+                actualizar_eventos()
+            if c5.value:
+                eventos_semana["Viernes"].append(evento)
+                actualizar_eventos()
+            if c6.value:
+                eventos_semana["Sábado"].append(evento)
+                actualizar_eventos()
+            if c7.value:
+                eventos_semana["Domingo"].append(evento)
+                actualizar_eventos()
         
+
         # Resetea el valor al original
         user_input.value = ""
         c1.value = False
+        c2.value = False
+        c3.value = False
+        c4.value = False
+        c5.value = False
+        c6.value = False
+        c7.value = False
+
         dlg_modal.open = False
         page.update()
     
@@ -57,7 +94,12 @@ async def main(page:ft.Page):
     
     # Checkboxes para los días
     c1 = ft.Checkbox(label=dias[0], value=False)
-
+    c2 = ft.Checkbox(label=dias[1], value=False)
+    c3 = ft.Checkbox(label=dias[2], value=False)
+    c4 = ft.Checkbox(label=dias[3], value=False)
+    c5 = ft.Checkbox(label=dias[4], value=False)
+    c6 = ft.Checkbox(label=dias[5], value=False)
+    c7 = ft.Checkbox(label=dias[6], value=False)
     
     # Ventana emergente para agregar eventos
     dlg_modal = ft.AlertDialog(
@@ -65,7 +107,7 @@ async def main(page:ft.Page):
         title=ft.Text("Add Evento"),
         content=ft.Column(controls=[
             user_input,
-            c1
+            c1,c2,c3,c4,c5,c6,c7,
         ]), 
         actions=[
             ft.TextButton("Save", on_click=closesave_dlg),
@@ -90,7 +132,7 @@ async def main(page:ft.Page):
                     width=127,
                     height=55,
                     content=ft.Text(nombre_dia, size=15),
-                    bgcolor=ft.colors.GREY_900,
+                    bgcolor=ft.colors.BROWN_900,
                     alignment=ft.alignment.center,
                     border_radius=10,
                 ),
@@ -102,47 +144,33 @@ async def main(page:ft.Page):
     # Crea las columnas de los días
     diassemana = [crear_columna_dia(dia) for dia in dias]
     
-    # Contenedores superiores e inferiores (omito el código para simplificar)
-    
     # Contenedor central con los días y sus eventos
     centro = ft.Container(
         content=ft.Row(
             controls=[
                 ft.ElevatedButton(
                     "Evento",
-                    color=ft.colors.AMBER,
+                    color=ft.colors.TEAL_ACCENT_400,
                     on_click=open_dlg_modal,
-                    bgcolor=ft.colors.GREY_800,
+                    bgcolor=ft.colors.TEAL_900,
                     width=120,
-                    height=40,
-                    icon="add_circle"
+                    height=50,
+                    icon="add_circle",
                 ),
                 *diassemana
             ]
         ),
         width=1100,
         height=75,
-        margin=ft.margin.only(top=10)
+        alignment=ft.alignment.center
     )
-    semanainfo = ft.Container(width=500,height=40,
-                     content=ft.Text("Semana",color=ft.colors.AMBER,weight=ft.FontWeight.W_500),
-                     border_radius=10,
-                     bgcolor=ft.colors.GREY_800,
-                     alignment=ft.alignment.center,
-                )
-    superior = ft.Container(content=semanainfo,width=1100, height=30,alignment=ft.alignment.center,margin=ft.margin.only(top=10))
-    # Contenedor principal
-    objetos = ft.Column(controls={
-        superior
-        ,centro
-    })
-    #FIRST CONTENEDOR (main)
-    contenedor = ft.Container(objetos,width=1200,height=1000,bgcolor=ft.colors.GREEN,alignment=ft.alignment.center)
     
     
+    contenedor = ft.Container(centro,alignment=ft.alignment.top_center)
     
     page.update()
     page.add(contenedor)
     
-ft.app(target=main, view=ft.AppView.WEB_BROWSER)
-ft.app(port=8550, target=main)
+ft.app(target=main)
+
+#ft.app(port=8550, target=main)
