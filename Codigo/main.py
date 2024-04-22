@@ -1,4 +1,40 @@
 import flet as ft
+from datetime import datetime
+
+#Muestra semana de lunes a domingo
+d = datetime.now()
+diasem = d.strftime("%A")
+mes = d.strftime("%B")
+year = d.strftime("%Y")
+
+if diasem == "Monday":
+    diasem = "Lunes"
+    dia1 = d.day
+    dia2 = d.day +6 
+elif diasem == "Tuesday":
+    diasem = "Martes"
+    dia1 = d.day -1
+    dia2 = d.day +5
+elif diasem == "Wednesday":
+    diasem = "Miércoles"
+    dia1 = d.day -2
+    dia2 = d.day +4
+elif diasem == "Thursday":
+    diasem = "Jueves"
+    dia1 = d.day -3
+    dia2 = d.day +3
+elif diasem == "Friday":
+    diasem = "Viernes"
+    dia1 = d.day -4
+    dia2 = d.day +2
+elif diasem == "Saturday":
+    diasem = "Sábado"
+    dia1 = d.day -5
+    dia2 = d.day +1
+elif diasem == "Sunday":
+    diasem = "Domingo"
+    dia1 = d.day -6
+    dia2 = d.day 
 
 dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
 
@@ -15,7 +51,7 @@ async def main(page:ft.Page):
     user_input = ft.TextField(label="Ingresa nombre de evento", autofocus=True)
     
     semanainfo = ft.Container(width=500,height=40,
-                     content=ft.Text("Semana",color=ft.colors.TEAL_ACCENT_400,weight=ft.FontWeight.W_500),
+                     content=ft.Text(f"Semana {dia1} - {dia2} de {mes} {year}",color=ft.colors.TEAL_ACCENT_400,weight=ft.FontWeight.W_500),
                      border_radius=10,
                      bgcolor=ft.colors.TEAL_900,
                      alignment=ft.alignment.center,
