@@ -13,7 +13,7 @@ def main(page: ft.Page):
     
     # Configuración del AppBar
     page.appbar = ft.AppBar(
-        title=ft.Text("Bienvenidos", color=ft.colors.WHITE),
+        title=ft.Text("Bienvenidos", color=ft.colors.WHITE, size=40, weight=ft.FontWeight.W_900),
         center_title=True,
         automatically_imply_leading=False,
     )
@@ -42,7 +42,7 @@ def main(page: ft.Page):
     )
 
     # Añadir el botón y otros elementos a la página
-    page.add(ft.Text("Haga clic para ver el calendario"), boton)
+    page.add(ft.Text("Haga clic para ver el calendario", size=15, color=ft.colors.BLUE, weight=ft.FontWeight.BOLD), boton)
     
     # Actualizar la página para reflejar los cambios
     page.update()
