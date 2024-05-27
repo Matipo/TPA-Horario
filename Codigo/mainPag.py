@@ -2,6 +2,7 @@ import flet as ft
 from datetime import datetime 
 from Clima import temperatura_
 from Icon import imag
+from Fechas import fechas
 
 class MainPage:
     def __init__(self):
@@ -10,9 +11,10 @@ class MainPage:
     def build(self, page: ft.Page):
         page.title = "Horario TPA"
         page.padding = 0
-        page.window_width = 1200
-        page.window_height = 1000
+        page.window_width = 1920
+        page.window_height = 1080
         page.window_resizable = True
+        page.window_maximized = True
 
 
     
@@ -22,48 +24,21 @@ class MainPage:
         automatically_imply_leading=False,
         )
 
-        page.vertical_alignment = "start"
+        page.vertical_alignment = "start",
+           
 
         temp_celsius = temperatura_()
         clima = temp_celsius.getClima()
 
-        d = datetime.now()
-        diasem = d.strftime("%A")
-        mes = d.strftime("%B")
-        year = d.strftime("%Y")
+        dia1,dia2 = fechas.obtenerSemana()
+        mes = fechas.getMes()
+        year = fechas.getAnio()
 
-        if diasem == "Monday":
-            diasem = "Lunes"
-            dia1 = d.day
-            dia2 = d.day +6 
-        elif diasem == "Tuesday":
-            diasem = "Martes"
-            dia1 = d.day -1
-            dia2 = d.day +5
-        elif diasem == "Wednesday":
-            diasem = "Miércoles"
-            dia1 = d.day -2
-            dia2 = d.day +4
-        elif diasem == "Thursday":
-            diasem = "Jueves"
-            dia1 = d.day -3
-            dia2 = d.day +3
-        elif diasem == "Friday":
-            diasem = "Viernes"
-            dia1 = d.day -4
-            dia2 = d.day +2
-        elif diasem == "Saturday":
-            iasem = "Sábado"
-            dia1 = d.day -5
-            dia2 = d.day +1
-        elif diasem == "Sunday":
-            diasem = "Domingo"
-            dia1 = d.day -6
-            dia2 = d.day 
 
         dias = ["Hora","Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
           
-        user_input = ft.TextField(label="Ingresa nombre de evento", autofocus=True)
+        user_input = ft.TextField(label="Ingresa nombre de evento: ", autofocus=True)
+        hora_input = ft.TextField(label="Ingresa la hora: ", autofocus=True)
     
         semanainfo = ft.Container(width=500,height=40,
                      content=ft.Text(f"Semana {dia1} - {dia2} de {mes} {year}",color=ft.colors.TEAL_ACCENT_400,weight=ft.FontWeight.W_500),
@@ -110,13 +85,15 @@ class MainPage:
 
             def actualizar_eventos():
                 for dia in dias:
-                    columnas_dia[dia].controls = [crear_contenedor_evento(evento) for evento in eventos_semana[dia]]
+                    # Ordena los eventos por hora
+                    eventos_semana[dia].sort(key=lambda x: x[0])
+                    columnas_dia[dia].controls = [crear_contenedor_evento(evento[1]) for evento in eventos_semana[dia]]
                     columnas_dia[dia].update()
 
 
             def crear_contenedor_evento(evento):
                 return ft.Container(
-                width=127,
+                width=128,
                 height=30,
                 content=ft.Text(evento, size=10,color=ft.colors.WHITE),
             # Establece el color de fondo como transparente
@@ -128,30 +105,32 @@ class MainPage:
             )
             def closesave_dlg(e):
                 evento = user_input.value
+                hora = hora_input.value
                 if evento != "":
                     if c1.value:
-                        eventos_semana["Lunes"].append(evento)
+                        eventos_semana["Lunes"].append((hora, evento))
                         actualizar_eventos()
                     if c2.value:
-                        eventos_semana["Martes"].append(evento)
+                        eventos_semana["Martes"].append((hora, evento))
                         actualizar_eventos()
                     if c3.value:
-                        eventos_semana["Miércoles"].append(evento)
+                        eventos_semana["Miércoles"].append((hora, evento))
                         actualizar_eventos()
                     if c4.value:
-                        eventos_semana["Jueves"].append(evento)
+                        eventos_semana["Jueves"].append((hora, evento))
                         actualizar_eventos()
                     if c5.value:
-                        eventos_semana["Viernes"].append(evento)
+                        eventos_semana["Viernes"].append((hora, evento))
                         actualizar_eventos()
                     if c6.value:
-                        eventos_semana["Sábado"].append(evento)
+                        eventos_semana["Sábado"].append((hora, evento))
                         actualizar_eventos()
                     if c7.value:
-                        eventos_semana["Domingo"].append(evento)
+                        eventos_semana["Domingo"].append((hora, evento))
                         actualizar_eventos()
 
                 user_input.value = ""
+                hora_input.value = ""
                 c1.value = False
                 c2.value = False
                 c3.value = False
@@ -183,6 +162,7 @@ class MainPage:
             title=ft.Text("Crear Evento"),
             content=ft.Column(controls=[
                 user_input,
+                hora_input,
                 c1,c2,c3,c4,c5,c6,c7,
             ]), 
             actions=[
@@ -198,7 +178,7 @@ class MainPage:
                 page.update()
             
     # Creación de la columna hora y sus horas
-            horas = [f"{hora:01d}:00" for hora in range(7, 24)]  # Desde las 7:00 hasta las 20:00
+            horas = [f"{hora:02d}:00" for hora in range(1, 24)]  # Desde las 7:00 hasta las 20:00
             def crear_contenedor_hora(hora):
                 return ft.Container(
                     width=127,
@@ -211,6 +191,7 @@ class MainPage:
                     margin=ft.margin.only(top=5)
                 )
             columna_horas = ft.Column(
+                
                 controls=[crear_contenedor_hora(hora) for hora in horas],
                 spacing=5
             )
@@ -239,9 +220,9 @@ class MainPage:
             diassemana = [crear_columna_dia(dia) for dia in dias]
     
     # Contenedor central con los días y sus eventos
-            centro = ft.Container(
+            centro = ft.Container( 
                 content=ft.Row(
-                    controls=[
+                    controls=[ 
                         ft.ElevatedButton(
                             "Evento",
                             color=ft.colors.TEAL_ACCENT_400,
@@ -250,6 +231,7 @@ class MainPage:
                             width=120,
                             height=50,
                             icon="add_circle",
+                            
                         ),
                         *diassemana
                     ]
@@ -258,12 +240,9 @@ class MainPage:
                 height=75,
                 alignment=ft.alignment.center
             )
-    
-    
+            
+            page.scroll="Always"
             contenedor = ft.Container(centro,alignment=ft.alignment.top_center)
-    
+            
             page.update()
             page.add(contenedor)
-
-          
-       

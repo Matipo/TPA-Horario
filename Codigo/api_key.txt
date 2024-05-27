@@ -1,0 +1,23 @@
+a66802356fd01b8ac009b3b3b3a075f2
+def celsius (Kelvin):
+    celsius = Kelvin - 273.15 
+    return celsius  
+
+
+#def get_weather(city, api_key):
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&APPID={api_key}" 
+    response = requests.get(url)
+    if response.status_code == 200:
+        temp = response.json()['main']['temp']
+        return celsius(temp)
+    else:
+        return None
+    
+#def get_icon(city, api_key):
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&APPID={api_key}" 
+    response = requests.get(url)
+    if response.status_code == 200:
+        icon = response.json()['weather'][0]['icon']  # Acceso correcto al icono
+        return icon
+    else:
+        return None#

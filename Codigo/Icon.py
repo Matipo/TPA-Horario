@@ -17,3 +17,5 @@ class imag:
         temp = response["weather"][0]["icon"] #especificamos los datos que queremos que nos devuelve el url, en este caso el icono.
 
         return temp # Devuelve el icono.
+
+

@@ -1,6 +1,7 @@
 import flet as ft
 from mainPag import MainPage  # Asegúrate de que este archivo exista y tenga la clase MainPage
 
+
 def main(page: ft.Page):
     # Configuración de la página principal
     page.title = "Menú TPA"
@@ -49,4 +50,3 @@ def main(page: ft.Page):
 
 # Iniciar la aplicación
 ft.app(target=main)
-

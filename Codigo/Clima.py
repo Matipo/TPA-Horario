@@ -21,6 +21,8 @@ class temperatura_:
 
         return temp_celsius.celsius1()  # Devuelve la temperatura en Celsius
 
-            
+
+
+
 
 
