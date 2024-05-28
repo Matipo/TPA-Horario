@@ -19,7 +19,7 @@ class fechas:
                 dias = 28
         else:
             dias = 31
-
+        
 
         if fecha.month-1 in [4, 6, 9, 11]:
             diasMesAnterior = 30
@@ -39,10 +39,11 @@ class fechas:
             if dia2 > dias:
                 dia2 = dia2-dias
         elif diaSemana == "Tuesday":
-            dia1 = fecha.day -1
-            dia2 = fecha.day +5
-            if dia1 < 1:
-                dia1 = diasMesAnterior+dia1
+            dia1 = fecha.day-1
+            dia2 = fecha.day+5
+    
+            if dia2> dias:
+                dia2 = dia2-dias
 
         elif diaSemana == "Wednesday" :
             dia1 = fecha.day -2
