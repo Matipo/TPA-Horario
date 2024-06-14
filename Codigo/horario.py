@@ -1,3 +1,6 @@
+import datetime
+import time
+import calendar
 import flet as ft
 
 class Calendario:
@@ -7,10 +10,80 @@ class Calendario:
 
     def build(self, page):
         days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+        meses = ["Enero", "Febrero", "Marzo", "Abril", "mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
         hours = [f"{i}:00" for i in range(8, 24)]  # Horas de 8 AM a 11 PM
 
-        grid = ft.Column(expand=True)
+        grid = ft.Column(expand=True, alignment=ft.alignment.center)
+
+        #Funcion para mostrar fecha
+
+        def verificar_Lun(e):
+            fecha_seleccionada = date_picker.value
+            nombre_dia = days[fecha_seleccionada.weekday()]
+            nombre_mes = meses[fecha_seleccionada.month -1]
+
+            #Creación del dialog de alerta
+            alert_dialog = ft.CupertinoAlertDialog(
+                title=ft.Text('Día inválido'),
+                content=ft.Text("Solo se permite la selección de dias Lunes."),
+            )
+
+            #Creacion de la función para comprobar si es distinto a lunes
+            if(nombre_dia != 'Lunes'):
+                page.dialog = alert_dialog
+                alert_dialog.open = True
+                page.update()
+                time.sleep(2)
+                alert_dialog.open = False
+                page.update()
+                date_picker.pick_date()
+            else: #Si el nombre del día es Lunes se ejecuta lo sigueinte
+                dias_mes = calendar.monthrange(date_picker.value.year, date_picker.value.month-1)[1]
+                dia_final = date_picker.value.day + 6
+
+                if dia_final > dias_mes:
+                    dia_final = dia_final - dias_mes
+                    mes_final = date_picker.value.month
+                    if mes_final > 12:
+                        mes_final = 1
+                else:
+                    dia_final = dia_final
+                    mes_final = date_picker.value.month -1
+
+                nombre_mes_final = meses[mes_final]
+
+                container_semana.content = ft.Text(f"Semana del Lunes {date_picker.value.day} de {nombre_mes} al Domingo {dia_final} de {nombre_mes_final}")
+                container_semana.update()
+
+        date_picker = ft.DatePicker(
+            on_change=verificar_Lun,
+            on_dismiss=lambda e: print(f"Date picker cerrado, valor es: {date_picker.value}"),
+            current_date=datetime.datetime.today(),
+            first_date=datetime.datetime(datetime.datetime.today().year, datetime.datetime.today().month, datetime.datetime.today().day),
+            last_date=datetime.datetime(datetime.datetime.today().year, 12, 31),
+            date_picker_entry_mode=ft.DatePickerEntryMode.CALENDAR_ONLY
+
+        )
+        page.overlay.append(date_picker)
+
+        date_button = ft.ElevatedButton(
+            "Fecha",
+            icon=ft.icons.CALENDAR_MONTH,
+            on_click=lambda _: date_picker.pick_date(),
+        )
         
+        #Crear container para la semana
+        container_semana = ft.Container(
+            content=ft.Text("Ingrese un día para mostrar"),
+            margin=10,
+            padding=10,
+            alignment=ft.alignment.center,
+            bgcolor="#803D3B",
+            width=400,
+            height=40,
+            border_radius=10,
+        )
+
         # Botón para agregar actividad
         add_activity_button = ft.TextButton(
             icon=ft.icons.ADD,
@@ -23,6 +96,11 @@ class Calendario:
         header_row = ft.Row(
             controls=[add_activity_button] + [ft.Container(ft.Text(day, weight="bold"), width=200, alignment=ft.alignment.center, border_radius=10, bgcolor='#803D3B', padding=5) for day in days]
         )
+        top_row = ft.Row(
+            controls= [container_semana], alignment=ft.MainAxisAlignment.CENTER)
+        
+        grid.controls.append(top_row)
+        grid.controls.append(date_button)
         grid.controls.append(header_row)
 
         rows = []
@@ -168,4 +246,3 @@ class Calendario:
         self.edit_dialog_input.value = ""
         self.edit_dlg_modal.open = False
         e.page.update()
-
