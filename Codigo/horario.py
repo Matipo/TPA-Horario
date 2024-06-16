@@ -1,7 +1,5 @@
-import datetime
-import time
-import calendar
 import flet as ft
+import datetime,time,calendar
 
 class Calendario:
     def __init__(self):
@@ -11,12 +9,10 @@ class Calendario:
     def build(self, page):
         days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
         meses = ["Enero", "Febrero", "Marzo", "Abril", "mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
-        hours = [f"{i}:00" for i in range(8, 24)]  # Horas de 8 AM a 11 PM
+        hours = [f"{i}:00" for i in range(8, 24)]  # Horas de 8AM a 11PM
 
-        grid = ft.Column(expand=True, alignment=ft.alignment.center)
-
-        #Funcion para mostrar fecha
-
+        grid = ft.Column(expand=True)
+        
         def verificar_Lun(e):
             fecha_seleccionada = date_picker.value
             nombre_dia = days[fecha_seleccionada.weekday()]
@@ -88,13 +84,13 @@ class Calendario:
         add_activity_button = ft.TextButton(
             icon=ft.icons.ADD,
             text="Evento",
-            on_click=lambda e: self.open_add_activity_dialog(page),
+            on_click=lambda e: self.open_principal_dialog(page),
             width=110,
         )
 
-        # Crear la cabecera de días
+        # Row de los dias
         header_row = ft.Row(
-            controls=[add_activity_button] + [ft.Container(ft.Text(day, weight="bold"), width=200, alignment=ft.alignment.center, border_radius=10, bgcolor='#803D3B', padding=5) for day in days]
+            controls=[add_activity_button] + [ft.Container(ft.Text(day, weight="bold"), width=200, alignment=ft.alignment.center, border_radius=10, bgcolor='#803D3B', padding=5,expand=True) for day in days]
         )
         top_row = ft.Row(
             controls= [container_semana], alignment=ft.MainAxisAlignment.CENTER)
@@ -112,6 +108,7 @@ class Calendario:
             )
             for day in days:
                 activity_key = f"{day}_{hour}"
+                # Boton de la actividad
                 activity_button = ft.TextButton(
                     text="",
                     visible=False,
@@ -125,13 +122,33 @@ class Calendario:
                         border=ft.border.all(1, "black"),
                         padding=5,
                         width=200,
-                        height=50
+                        height=50,
+                        expand=True
                     )
                 )
             rows.append(hour_row)
         
         grid.controls.extend(rows)
 
+
+        # ---------------------------------------     DIALOG PRINCIPAL     ---------------------------------------
+
+        self.principal_dlg_modal = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Gestionar actividad",text_align=ft.TextAlign.CENTER),
+            content=ft.Column(controls=[
+                #ft.Container(content=ft.TextButton(icon=ft.icons.ADD,text='Agregar',on_click=lambda e: self.open_add_activity_dialog(page)),alignment=ft.alignment.center_left),
+                ft.TextButton(icon=ft.icons.ADD,text='Agregar',on_click=lambda e: self.open_add_activity_dialog(page),width=200,height=50),
+                ft.TextButton(icon=ft.icons.BUILD,text='Editar',on_click=lambda e: self.open_edit_dialog(page),width=200,height=50),
+                ft.TextButton(icon=ft.icons.DELETE,text='Eliminar',on_click=lambda e: self.open_delete_activity_dialog(page),width=200,height=50)
+                ],horizontal_alignment=ft.CrossAxisAlignment.CENTER,expand=True),
+            actions=[
+                ft.IconButton(icon=ft.icons.CANCEL,on_click=self.cancel_principal),
+            ],actions_alignment=ft.MainAxisAlignment.END,content_padding=ft.padding.only(top=20)
+        )
+
+
+        # --------------------------------------- DIALOG AGREGAR ACTIVIDAD ---------------------------------------
         # Campo de entrada para el cuadro de diálogo
         self.add_dialog_input = ft.TextField(label="Actividad", autofocus=True)
         self.add_dialog_hour = ft.Dropdown(label="Hora", options=[ft.dropdown.Option(f"{i}:00") for i in range(8, 24)])
@@ -144,11 +161,31 @@ class Calendario:
             content=ft.Column(controls=[self.add_dialog_input, self.add_dialog_hour] + self.add_dialog_days),
             actions=[
                 ft.IconButton(icon=ft.icons.SAVE, on_click=self.save_new_activity),
-                ft.IconButton(icon=ft.icons.CANCEL, on_click=self.cancel_add)
+                ft.IconButton(icon=ft.icons.CANCEL, on_click= lambda e: self.open_principal_dialog(page))
+            ],
+            actions_alignment=ft.MainAxisAlignment.END
+        )
+            
+        # --------------------------------------- DIALOG EDITAR ACTIVIDAD ---------------------------------------
+        # Campo de entrada para el cuadro de diálogo de edición
+        self.dlg_input_edit = ft.TextField(label="Actividad", autofocus=True)
+        self.dlg_hour_edit = ft.Dropdown(label="Hora", options=[ft.dropdown.Option(f"{i}:00") for i in range(8, 24)])
+        self.dlg_days_edit = [ft.Checkbox(label=day) for day in days]
+
+        # Crear el cuadro de diálogo para modificar el contenido del cuadrado
+        self.edit2_dlg_modal = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Modificar actividad"),
+            content=ft.Column(controls=[self.dlg_input_edit,self.dlg_hour_edit]+ self.dlg_days_edit),
+            actions=[
+                ft.IconButton(icon=ft.icons.SAVE, on_click=self.save_new_edit),
+                ft.IconButton(icon=ft.icons.CANCEL, on_click=lambda e: self.open_principal_dialog(page))
             ],
             actions_alignment=ft.MainAxisAlignment.END
         )
 
+
+        # --------------------------------------- DIALOG EDITAR ACTIVIDAD ---------------------------------------
         # Campo de entrada para el cuadro de diálogo de edición
         self.edit_dialog_input = ft.TextField(label="Actividad", autofocus=True)
 
@@ -159,12 +196,25 @@ class Calendario:
             content=self.edit_dialog_input,
             actions=[
                 ft.IconButton(icon=ft.icons.SAVE, on_click=self.save_content),
-                ft.IconButton(icon=ft.icons.DELETE, on_click=self.delete_content),
                 ft.IconButton(icon=ft.icons.CANCEL, on_click=self.cancel_edit)
             ],
             actions_alignment=ft.MainAxisAlignment.END
         )
 
+        # --------------------------------------- DIALOG ELIMINAR ACTIVIDAD ---------------------------------------
+        self.delete_dlg_modal = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Eliminar actividad"),
+            content=ft.Column(controls=[self.add_dialog_hour] + self.add_dialog_days),
+            actions=[
+                ft.IconButton(icon=ft.icons.SAVE, on_click=self.save_delete),
+                ft.IconButton(icon=ft.icons.CANCEL, on_click=self.cancel_delete)
+            ],
+            actions_alignment=ft.MainAxisAlignment.END
+        )
+
+
+        # --------------------------------------- PARA LA SCROLLBAR ---------------------------------------
         # Envolver el grid en un ListView para la barra de desplazamiento vertical
         scrollable_grid = ft.ListView(
             expand=True,
@@ -172,6 +222,16 @@ class Calendario:
         )
 
         return scrollable_grid
+
+
+    # ---------------------------------------     OPEN DIALOG PRINCIPAL     ---------------------------------------
+
+    def open_principal_dialog(self,page):
+        page.dialog = self.principal_dlg_modal
+        self.principal_dlg_modal.open = True
+        page.update()
+
+    # --------------------------------------- OPEN DIALOG AGREGAR ACTIVIDAD ---------------------------------------
 
     # Función para abrir el cuadro de diálogo para agregar actividad
     def open_add_activity_dialog(self, page):
@@ -183,6 +243,21 @@ class Calendario:
         page.dialog = self.add_dlg_modal
         self.add_dlg_modal.open = True
         page.update()
+    
+    
+    # --------------------------------------- OPEN  EDITAAAAAAAAAAAAAAAAAAAA ACTIVIDAD ---------------------------------------
+
+    # Función para abrir el cuadro de diálogo para agregar actividad
+    def open_edit_dialog(self, page):
+        self.dlg_input_edit.value = ""
+        self.dlg_hour_edit.value = None
+        for checkbox in self.dlg_days_edit:
+            checkbox.value = False
+        page.dialog = self.edit2_dlg_modal
+        self.edit2_dlg_modal.open = True
+        page.update()
+
+    # --------------------------------------- OPEN DIALOG EDITAR ACTIVIDAD ---------------------------------------
 
     # Función para abrir el cuadro de diálogo para modificar el contenido
     def open_edit_activity_dialog(self, page, key):
@@ -191,6 +266,22 @@ class Calendario:
         page.dialog = self.edit_dlg_modal
         self.edit_dlg_modal.open = True
         page.update()
+
+
+    # --------------------------------------- OPEN DIALOG ElIMINAR ACTIVIDAD ---------------------------------------
+
+    def open_delete_activity_dialog(self, page):
+        self.current_key = None
+        self.add_dialog_hour.value = None
+        for checkbox in self.add_dialog_days:
+            checkbox.value = False
+        page.dialog = self.delete_dlg_modal
+        self.delete_dlg_modal.open = True
+        page.update()
+
+    # -------------------------------------------- SAVES ----------------------------------------------
+
+    # --------------------------------------- AGREGAR ACTIVIDAD ---------------------------------------
 
     # Función para guardar el contenido del cuadro al agregar nueva actividad
     def save_new_activity(self, e):
@@ -209,6 +300,26 @@ class Calendario:
         self.add_dlg_modal.open = False
         e.page.update()
 
+    # --------------------------------------- EDITAR2 ACTIVIDAD ---------------------------------------
+
+    #
+    def save_new_edit(self, e):
+        nContenido = self.dlg_input_edit.value
+        hora_selec = self.dlg_hour_edit.value
+        dia_selec = [checkbox.label for checkbox in self.dlg_days_edit if checkbox.value]
+
+        for day in dia_selec:
+            n_key = f"{day}_{hora_selec}"
+            self.actividades[n_key] = nContenido
+            bot = self.botones[n_key]
+            bot.text = nContenido
+            bot.update()
+        
+        self.edit2_dlg_modal.open = False
+        e.page.update()
+
+    # --------------------------------------- EDITAR ACTIVIDAD ---------------------------------------
+
     # Función para guardar el contenido del cuadro
     def save_content(self, e):
         if self.current_key:
@@ -222,23 +333,32 @@ class Calendario:
         self.edit_dlg_modal.open = False
         e.page.update()
 
-    # Función para eliminar el contenido del cuadro
-    def delete_content(self, e):
-        if self.current_key:
-            if self.current_key in self.actividades:
-                del self.actividades[self.current_key]
-            button = self.botones[self.current_key]
-            button.text = ""
+    # --------------------------------------- DELETE ACTIVIDAD ---------------------------------------
+    # Función para guardar el delete
+    def save_delete(self,e):
+        hora = self.add_dialog_hour.value
+        dya = [checkbox.label for checkbox in self.add_dialog_days if checkbox.value]
+        for day in dya:
+            key = f"{day}_{hora}"
+            self.actividades[key] = ""
+            button = self.botones[key]
             button.visible = False
-            button.update()  # Actualizar visualmente el botón
-
-        self.edit_dlg_modal.open = False
+            button.update()
+        
+        self.delete_dlg_modal.open = False
         e.page.update()
-
+        
+    
+    # --------------------------------------- CANCELS DIALOGS ---------------------------------------
+    # Función para cancelar el menu de gestion de actividad
+    def cancel_principal(self,e):
+        self.principal_dlg_modal.open=False
+        e.page.update()
+    
     # Función para cancelar la adición de actividad
     def cancel_add(self, e):
         self.add_dialog_input.value = ""
-        self.add_dlg_modal.open = False
+        self.add_dlg_modal.open = True
         e.page.update()
 
     # Función para cancelar la edición
@@ -246,3 +366,11 @@ class Calendario:
         self.edit_dialog_input.value = ""
         self.edit_dlg_modal.open = False
         e.page.update()
+
+    # Función para cancelar el delete
+    def cancel_delete(self, e):
+        self.delete_dlg_modal.open = False
+        e.page.update()
+
+    
+

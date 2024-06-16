@@ -160,6 +160,12 @@ def main(page: ft.Page):
     page.window_min_height = 820
     page.window_min_width = 1000
     
+    locale_es = ft.Locale(language_code="es", country_code="ES")
+
+    page.locale_configuration = ft.LocaleConfiguration(
+        supported_locales=[locale_es],
+        current_locale=locale_es 
+    )
     page.bgcolor = '#322C2B'
     page.theme_mode = 'dark'
     page.theme = ft.Theme(
